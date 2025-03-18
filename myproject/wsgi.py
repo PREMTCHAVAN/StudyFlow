@@ -8,13 +8,6 @@ https://docs.djangoproject.com/en/5.0/howto/deployment/wsgi/
 """
 
 import os
-import os
-
-
-
-from django.core.wsgi import get_wsgi_application
-os.system("python manage.py migrate")  # Run migrations automatically
-application = get_wsgi_application()
 
 from django.core.wsgi import get_wsgi_application
 
