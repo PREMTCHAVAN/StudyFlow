@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow | Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        customBlue: '#4F46E5', /* Cool Blue */
+                        customPurple: '#8B5CF6', /* Purple Gradient */
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        /* 📱 Mobile Responsive Styles */
+        @media (max-width: 640px) {
+            .login-container {
+                width: 90%;
+                padding: 1.5rem;
+            }
+            .login-title {
+                font-size: 1.5rem;
+            }
+            .login-form input {
+                padding: 0.75rem;
+            }
+            .login-button {
+                padding: 0.75rem;
+                font-size: 1rem;
+            }
+            .footer {
+                bottom: 10px;
+            }
+            .footer p {
+                font-size: 0.9rem;
+            }
+            .footer img {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen relative">
+
+    <!-- Login Container -->
+    <div class="login-container backdrop-blur-md bg-white/10 p-8 rounded-lg shadow-lg w-96 border border-gray-700 sm:w-full sm:max-w-sm">
+        <h2 class="login-title text-2xl font-semibold text-center text-gray-200 mb-4">Login to StudyFlow</h2>
+
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <p class="text-red-400 text-sm text-center">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" class="login-form space-y-4">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required
+                class="w-full p-3 border border-gray-500 rounded-md bg-gray-800 text-white focus:ring-2 focus:ring-customBlue">
+            <input type="password" name="password" placeholder="Password" required
+                class="w-full p-3 border border-gray-500 rounded-md bg-gray-800 text-white focus:ring-2 focus:ring-customBlue">
+            <button type="submit"
+                class="login-button w-full bg-customBlue text-white p-3 rounded-md hover:bg-customPurple transition">
+                Login
+            </button>
+        </form>
+
+        <p class="text-center text-gray-400 mt-4">
+            Don't have an account?
+            <a href="{% url 'signup' %}" class="text-customBlue hover:underline">Sign up</a>
+        </p>
+    </div>
+
+    <!-- 📍 DEVELOPED BY PREM + LinkedIn Icon (Now Perfectly Aligned) -->
+    <div class="footer absolute bottom-4 right-4 flex items-center space-x-2">
+        <p class="text-white font-bold text-lg">🚀 DEVELOPED BY PREM</p>
+        <a href="https://www.linkedin.com/in/prem-chavan-programmer" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn"
+                class="w-6 h-6 hover:opacity-80 transition">
+        </a>
+    </div>
+
+</body>
+</html>

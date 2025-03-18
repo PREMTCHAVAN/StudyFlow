@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Smooth AI-style gradient background */
+        body {
+            background: linear-gradient(135deg, #1E1E2E, #2C2C3E, #3A3A4E);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-start text-white">
+
+
+      <!-- 🚀 HEADER (LOGO + TITLE + SUBTITLE) -->
+      <div class="text-center mb-6">
+        <h1 class="text-4xl font-bold text-white">StudyFlow</h1>
+        <p class="text-gray-400 text-lg">Track, Learn, and Succeed 🚀</p>
+    </div>
+
+    <!-- Logout Button -->
+    <div class="w-full max-w-screen-xl flex justify-end p-4">
+        <a href="{% url 'logout' %}" 
+           class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200">
+            Logout
+        </a>
+    </div>
+
+    <div class="w-full max-w-screen-xl p-8 bg-white/10 backdrop-blur-lg rounded-lg shadow-lg grid grid-cols-1 md:grid-cols-2 gap-8 border border-gray-700">
+
+        <!-- Left Column (Profile + Progress + Topics) -->
+        <div class="space-y-8">
+
+            <!-- Profile Info Section -->
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-lg shadow-lg text-white">
+                <h3 class="text-2xl font-semibold mb-4">Your Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm text-gray-200">Full Name:</p>
+                        <p id="fullName" class="text-lg font-medium">
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-200">Email:</p>
+                        <p id="email" class="text-lg font-medium">
+                            {{ request.user.email|default:"No email provided" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Dashboard Section (Above Topics) -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-medium text-gray-200 mb-4">Progress</h3>
+                <div class="w-full bg-gray-700 rounded-full h-6">
+                    <div id="progressBar" class="bg-blue-500 h-6 rounded-full text-center text-white text-sm leading-6" style="width: 0%">0%</div>
+                </div>
+            </div>
+
+            <!-- Topics Section (Now Below Progress Bar) -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-medium text-gray-200 mb-4">Topics to Learn</h3>
+                <div id="topics" class="space-y-4"></div>
+
+                <!-- Add Topic Form -->
+                <div class="mt-6">
+                    <h4 class="text-lg font-medium text-gray-200">Add New Topic</h4>
+                    <form id="addTopicForm" class="mt-4 flex items-center">
+                        <input type="text" id="topicName" class="p-2 w-full border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500" placeholder="Topic Name" required>
+                        <button type="submit" class="ml-2 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-200">
+                            Add
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column (Resources Section, Auto Expands) -->
+        <div class="space-y-8 w-full">
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-medium text-gray-200 mb-4">Your Resources</h3>
+                <ul id="resources" class="space-y-4"></ul>
+
+                <!-- Add Resource Form -->
+                <div class="mt-6">
+                    <h4 class="text-lg font-medium text-gray-200">Add New Resource</h4>
+                    <form id="addResourceForm" class="mt-4">
+                        <input type="text" id="resourceTitle" class="p-2 w-full border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500" placeholder="Resource Title" required>
+                        <input type="url" id="resourceLink" class="p-2 w-full border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 mt-2" placeholder="Resource Link" required>
+                        <button type="submit" class="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-200 mt-2">
+                            Add Resource
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="mt-8 text-gray-400">
+        🚀 Developed by 
+        <a href="https://www.linkedin.com/in/prem-chavan-programmer" target="_blank" 
+           class="text-blue-400 font-bold hover:underline">
+            Prem Chavan
+        </a> | StudyFlow 2025
+    </div>
+
+    <script>
+        const topics = [];
+        const resources = [];
+
+        function renderTopics() {
+            const topicsList = document.getElementById('topics');
+            topicsList.innerHTML = '';
+            topics.forEach((topic, index) => {
+                const topicItem = document.createElement('div');
+                topicItem.classList.add('flex', 'items-center', 'space-x-4');
+                topicItem.innerHTML = `
+                    <input type="checkbox" id="topic-${index}" ${topic.completed ? 'checked' : ''} class="mr-2" onclick="toggleTopicCompletion(${index})">
+                    <label for="topic-${index}" class="text-lg text-gray-300">${topic.name}</label>
+                `;
+                topicsList.appendChild(topicItem);
+            });
+            updateProgress();
+        }
+
+        function renderResources() {
+            const resourceList = document.getElementById('resources');
+            resourceList.innerHTML = '';
+            resources.forEach(resource => {
+                const resourceItem = document.createElement('li');
+                resourceItem.classList.add('p-3', 'bg-gray-700', 'rounded-md', 'text-gray-300', 'flex', 'justify-between');
+                resourceItem.innerHTML = `
+                    <span>${resource.title} - <a href="${resource.link}" target="_blank" class="text-blue-400 hover:underline">Open</a></span>
+                `;
+                resourceList.appendChild(resourceItem);
+            });
+            document.body.style.height = "auto"; // Extend page height dynamically
+        }
+
+        function updateProgress() {
+            const completedTopics = topics.filter(topic => topic.completed).length;
+            const totalTopics = topics.length;
+            const progress = totalTopics > 0 ? (completedTopics / totalTopics) * 100 : 0;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressBar').innerText = `${Math.round(progress)}%`;
+        }
+
+        function toggleTopicCompletion(index) {
+            topics[index].completed = !topics[index].completed;
+            updateProgress();
+        }
+
+        document.getElementById('addTopicForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const topicName = document.getElementById('topicName').value.trim();
+            if (topicName) {
+                topics.push({ name: topicName, completed: false });
+                renderTopics();
+                document.getElementById('topicName').value = '';
+            }
+        });
+
+        document.getElementById('addResourceForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const title = document.getElementById('resourceTitle').value.trim();
+            const link = document.getElementById('resourceLink').value.trim();
+            if (title && link) {
+                resources.push({ title, link });
+                renderResources();
+                document.getElementById('resourceTitle').value = '';
+                document.getElementById('resourceLink').value = '';
+            }
+        });
+
+        renderTopics();
+        renderResources();
+        updateProgress();
+    </script>
+
+</body>
+</html>
